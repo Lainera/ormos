@@ -1,9 +1,9 @@
 ---
-# Provide socket address for custom dns server
+# Provide optional socket address for custom dns server, defaults to google DNS servers
 dns: 8.8.8.8:53
-# Provide catch-all socket address destination for traffic w/o SNI
+# Provide optional catch-all socket address destination for traffic w/o SNI
 default_destination: '[2607:f8b0:400a:807::200e]:80'
-# Provide IP address to bind to 
+# Provide optional IP address to bind to, defaults to 127.0.0.1
 bind_address: 127.0.0.1
 # List of services to route for 
 services:
