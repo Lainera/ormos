@@ -1,0 +1,32 @@
+---
+# Provide socket address for custom dns server
+dns: 8.8.8.8:53
+# Provide catch-all socket address destination for traffic w/o SNI
+default_destination: '[2607:f8b0:400a:807::200e]:80'
+# Provide IP address to bind to 
+bind_address: 127.0.0.1
+# List of services to route for 
+services:
+    # hostname
+  - name: bepis.com
+    # Upon receiving request for 'bepis.com'
+    # round robins to addresses below
+    forward:
+      - "127.0.0.1"
+      - "::1"
+    # Listens on ports 3333 and 9000
+    # Forwards everything from 3333 to 6666 
+    # Forwards everything from 9000 to 9000
+    ports:
+      - 3333:6666
+      - 9000
+  - name: google.com
+    # No forward section -> will use DNS
+    ports:
+      - 8000:443
+      # Multiple services can listen on the same port
+      - 3333:443
+     
+  - name: example.com 
+    # No forward section -> will use DNS
+    # No port section -> default to 443:443
