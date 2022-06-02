@@ -43,3 +43,7 @@ P->>C: Forward bytes to Client
 - [Get rust](https://rustup.rs/)
 - Build with `cargo build --bin rpx --features instrument --release`. Alternatively you may cross-compile with `docker buildx` - see `Makefile` for inspiration.  
 - Take a look at [`sample_config.yml`](./sample_config.yml), punch in values relevant for your use-case 
+
+## More docs
+
+- Run `cargo doc --open` 
