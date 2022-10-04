@@ -15,7 +15,7 @@ use trust_dns_resolver::{
 use crate::config::Config;
 
 #[derive(Debug)]
-/// Handle to background DNS resolver task. 
+/// Handle to background DNS resolver task.
 pub struct Resolver<S> {
     state: S,
 }
@@ -41,7 +41,7 @@ impl Clone for Resolver<Running> {
 
 impl Resolver<Running> {
     #[instrument]
-    /// Resolves hostname from SNI to remote address. 
+    /// Resolves hostname from SNI to remote address.
     pub async fn resolve(
         &self,
         host: String,
@@ -180,4 +180,3 @@ fn start_background_resolver(config: &Config) -> Result<TokioAsyncResolver, anyh
     TokioAsyncResolver::tokio(resolver_config, resolver_opts)
         .map_err(|err| anyhow::anyhow!("{err}"))
 }
-
