@@ -1,6 +1,5 @@
-//! To route by SNI, this field needs to be parsed from TLS handshake. 
+//! To route by SNI, this field needs to be parsed from TLS handshake.
 //! To avoid reinventing wheels - module leverages [`rustls`].
-//!
 use anyhow::Error;
 use bytes::BufMut;
 use rustls::{internal::msgs::message::OpaqueMessage, server::Acceptor};
@@ -9,7 +8,8 @@ use tokio::io::AsyncReadExt;
 use tracing::{debug, error, instrument, trace};
 
 #[instrument]
-/// Collects incoming data from [`tokio::io::AsyncReadExt`] into [`bytes::BufMut`], feeding each read into [`rustls::server::Acceptor`]
+/// Collects incoming data from [`tokio::io::AsyncReadExt`] into [`bytes::BufMut`],
+/// feeding reads to [`rustls::server::Acceptor`].
 /// until SNI value is readable from TLS handshake or MAX_WIRE_SIZE exceeded.
 pub async fn read_sni<B, R>(buf: &mut B, reader: &mut R) -> Result<String, Error>
 where

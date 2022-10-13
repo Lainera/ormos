@@ -17,6 +17,7 @@ COPY ./Cargo.* ./
 COPY ./.cargo/vendor ./.cargo/config.toml
 COPY ./src ./src 
 COPY ./vendor ./vendor 
+COPY ./Readme.md ./Readme.md
 
 ENV CARGO_TARGET_ARMV7_UNKNOWN_LINUX_MUSLEABIHF_LINKER=arm-linux-gnueabihf-ld
 ENV TARGET_CC=arm-linux-gnueabihf-gcc
