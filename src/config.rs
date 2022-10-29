@@ -40,13 +40,13 @@
 use clap::Parser;
 use serde::{de::Visitor, Deserialize};
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     fs::File,
     marker::PhantomData,
     net::{IpAddr, SocketAddr},
     path::PathBuf,
 };
-use tracing::{debug, warn};
+use tracing::debug;
 
 const DEFAULT_BIND: &str = "127.0.0.1";
 
@@ -95,11 +95,13 @@ pub fn load_config() -> Result<Config, anyhow::Error> {
 
 impl ConfigFile {
     fn validate(self) -> Result<Config, anyhow::Error> {
-        if self.services.is_empty() {
-            return Err(anyhow::anyhow!("Config must include at least one service"));
-        }
-
         let dns: Option<SocketAddr> = self.dns.and_then(|as_string| as_string.parse().ok());
+
+        if dns.is_none() && self.services.is_empty() {
+            return Err(anyhow::anyhow!(
+                "Config must include at least one service or dns server"
+            ));
+        }
 
         let bind_address: IpAddr = self
             .bind_address
@@ -211,152 +213,12 @@ impl Config {
             .flat_map(|service| service.ports.iter().map(|port_binding| port_binding.0))
             .collect()
     }
-
-    /// Used by [`Resolver`](crate::dns::Resolver) to lookup hardcoded routing rules
-    pub fn forward_addr_by_service_name(&self) -> HashMap<String, Vec<IpAddr>> {
-        self.services
-            .iter()
-            .fold(HashMap::new(), |mut map, service| {
-                map.insert(service.name.clone(), service.forward.clone());
-                map
-            })
-    }
-
-    /// Used by [`Resolver`](crate::dns::Resolver) to lookup remote port for service
-    pub fn remote_port_by_service_name_and_local(&self) -> HashMap<(String, u16), u16> {
-        self.services
-            .iter()
-            .fold(HashMap::new(), |mut map, service| {
-                for port_binding in service.ports.iter() {
-                    if map
-                        .insert((service.name.clone(), port_binding.0), port_binding.1)
-                        .is_some()
-                    {
-                        warn!(
-                            name = service.name.as_str(),
-                            port = port_binding.0,
-                            "Duplicate port mapping detected"
-                        );
-                    }
-                }
-                map
-            })
-    }
 }
 
 #[cfg(test)]
 mod test {
-    use super::{Config, PortBinding, Service};
+    use super::{PortBinding, Service};
     use indoc::indoc;
-    use std::marker::PhantomData;
-    use std::net::IpAddr;
-
-    impl From<Vec<Service>> for Config {
-        fn from(services: Vec<Service>) -> Self {
-            Self {
-                dns: None,
-                bind_address: "127.0.0.1"
-                    .parse()
-                    .expect("Failed to parse valid IPv4 addr"),
-                default_destination: None,
-                services,
-                _empty: PhantomData,
-            }
-        }
-    }
-
-    #[test]
-    fn config_keys_by_name() {
-        let services = vec![
-            Service {
-                name: "first.xyz".into(),
-                ports: vec![PortBinding(80, 80)],
-                forward: Vec::new(),
-            },
-            Service {
-                name: "second.xyz".into(),
-                ports: vec![PortBinding(80, 80)],
-                forward: vec!["127.0.0.1".parse().unwrap()],
-            },
-        ];
-
-        let config: Config = services.into();
-
-        let by_name = config.forward_addr_by_service_name();
-        assert_eq!(by_name.len(), 2);
-        let first = by_name.get("first.xyz").unwrap();
-        assert!(first.is_empty());
-
-        let second = by_name.get("second.xyz").unwrap();
-        assert_eq!(second.len(), 1);
-        assert_eq!(
-            second.first().unwrap(),
-            &"127.0.0.1".parse::<IpAddr>().unwrap()
-        );
-    }
-
-    #[test]
-    fn config_keys_by_name_and_port() {
-        let services = vec![
-            Service {
-                name: "first.xyz".into(),
-                ports: vec![PortBinding(80, 80), PortBinding(3333, 4444)],
-                forward: Vec::new(),
-            },
-            Service {
-                name: "second.xyz".into(),
-                ports: vec![PortBinding(80, 80), PortBinding(3333, 5555)],
-                forward: vec!["127.0.0.1".parse().unwrap()],
-            },
-        ];
-
-        let config: Config = services.into();
-        let by_name_and_port = config.remote_port_by_service_name_and_local();
-
-        assert_eq!(
-            by_name_and_port
-                .get(&("first.xyz".to_string(), 80))
-                .unwrap(),
-            &80
-        );
-        assert_eq!(
-            by_name_and_port
-                .get(&("first.xyz".to_string(), 3333))
-                .unwrap(),
-            &4444
-        );
-        assert_eq!(
-            by_name_and_port
-                .get(&("second.xyz".to_string(), 80))
-                .unwrap(),
-            &80
-        );
-        assert_eq!(
-            by_name_and_port
-                .get(&("second.xyz".to_string(), 3333))
-                .unwrap(),
-            &5555
-        );
-    }
-
-    #[test]
-    fn config_keys_by_name_and_port_latter_takes_precedence() {
-        let services = vec![Service {
-            name: "first.xyz".into(),
-            ports: vec![PortBinding(80, 80), PortBinding(80, 4444)],
-            forward: Vec::new(),
-        }];
-
-        let config: Config = services.into();
-        let by_name_and_port = config.remote_port_by_service_name_and_local();
-
-        assert_eq!(
-            by_name_and_port
-                .get(&("first.xyz".to_string(), 80))
-                .unwrap(),
-            &4444
-        );
-    }
 
     #[test]
     fn service_defaults_to_https() {
