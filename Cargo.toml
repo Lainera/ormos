@@ -1,12 +1,12 @@
 [package]
 name = "rpx"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 
 [[bin]]
 name = "rpx"
 path = "src/bin/rpx.rs"
-required-features = ["instrument"]
+required-features = ["rpx"]
 
 [dependencies]
 tokio = { version = "~1.18", features = ["net", "rt", "macros", "rt-multi-thread", "io-util", "sync"] }
@@ -21,9 +21,12 @@ bytes = "~1.1"
 serde_yaml = "~0.8"
 serde = { version = "~1.0", features = ["derive"] }
 rand = { version = "~0.8", features = ["small_rng"] }
+thiserror = "1.0.37"
+pin-project = "1.0.12"
+tower = { version = "0.4.13" }
 
 [dev-dependencies]
 indoc = "~1.0"
 
 [features]
-instrument = ["tracing-subscriber"]
+rpx = ["tracing-subscriber", "tower/filter", "tower/util", "tower/buffer"]

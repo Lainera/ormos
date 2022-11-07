@@ -1,6 +1,6 @@
 REGISTRY ?= ''
 BIN = rpx
-FEATURES = instrument
+FEATURES = rpx 
 ifeq ($(REGISTRY), '')
 	TAG ?= $(BIN)
 else
