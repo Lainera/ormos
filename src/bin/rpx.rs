@@ -32,12 +32,8 @@ async fn main() -> Result<(), anyhow::Error> {
                         let forwarder_span = info_span!("forwarder");
                         forwarder_span.follows_from(Span::current());
                         async move {
-                            let mut parsers = get_parsers();
-                            let mut ps: Vec<&mut _> =
-                                parsers.iter_mut().map(|boxed| boxed.as_mut()).collect();
-
                             if let Err(err) =
-                                forward(&mut incoming, resolver, ps.as_mut_slice()).await
+                                forward(&mut incoming, resolver, get_parsers().into_iter()).await
                             {
                                 error!("Failed to forward traffic for {incoming:?} -> {err}");
                             }
