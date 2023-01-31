@@ -1,0 +1,22 @@
+[package]
+name = "ormos"
+version = "0.1.0"
+edition.workspace = true
+authors.workspace = true
+
+
+[dependencies]
+anyhow = "~1.0"
+futures = "~0.3"
+rpx = { path = "../rpx", features = ["filter"] }
+tokio = { version = "~1.18", features = ["net", "rt", "macros", "rt-multi-thread", "io-util", "sync"] }
+tower = { version = "0.4.13", features = ["buffer", "util"] }
+tracing = "~0.1"
+tracing-subscriber = { version = "~0.3" }
+serde_yaml = "~0.8"
+serde = { version = "~1.0", features = ["derive", "rc"] }
+# strum = { version = "0.24.1", features = ["derive"] }
+clap = { version = "~3.1", features = ["default", "derive", "cargo"] }
+
+[dev-dependencies]
+indoc = "~1.0"

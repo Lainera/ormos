@@ -40,10 +40,22 @@ P->>C: Forward bytes to Client
 
 ## Installation
 
+### Nix 
+Package comes with nix flake and support for cross-platform docker images:
+
+- [Get nix](https://nixos.org/download.html)
+- `nix run .` to compile and run 
+- `nix build .` to build an artifact for the current system
+- `nix build .#image` to build docker image for current system. Import image into docker with `docker load < result`  
+- `nix build .#aarch64-image` to build docker image for `aarch64` architecture
+- `nix build .#x86_64-image` to build docker image for `x86_64` architecture
+
+### Build from source 
+
 - [Get rust](https://rustup.rs/)
-- Build with `cargo build --bin rpx --features instrument --release`. Alternatively you may cross-compile with `docker buildx` - see `Makefile` for inspiration.  
-- Take a look at [`sample_config.yml`](./sample_config.yml), punch in values relevant for your use-case 
+- Build with `cargo build --release -p ormos`. 
+- Take a look at `sample_config.yml`, punch in values relevant for your use-case 
+
 
 ## More docs
-
 - Run `cargo doc --open` 

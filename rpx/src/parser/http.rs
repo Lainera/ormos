@@ -12,6 +12,7 @@ const DELETE: &[u8] = b"DELETE";
 const METHODS: [&[u8]; 9] = [GET, HEAD, OPTIONS, CONNECT, POST, PUT, PATCH, TRACE, DELETE];
 
 /// Parses the hostname from http/1 bytes
+#[derive(Default)]
 pub struct Hostname;
 
 #[derive(Debug, thiserror::Error)]

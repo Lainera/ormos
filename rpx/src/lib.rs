@@ -1,6 +1,4 @@
-#![doc = include_str!("../Readme.md")]
-
-pub mod config;
+#![doc = include_str!("../../Readme.md")]
 pub mod parser;
 pub mod resolver;
 
@@ -23,7 +21,6 @@ pub enum Error {
     Other(Box<dyn std::error::Error + Sync + Send + 'static>),
 }
 
-#[instrument(skip_all, fields(incoming = ?incoming.peer_addr(), port = ?incoming.local_addr().map(|a| a.port())))]
 /// Forwards traffic from incoming connection to preconfigured destination.
 ///
 /// Forwarding traffic involves following steps:
@@ -48,6 +45,7 @@ pub enum Error {
 ///
 /// Once connection to remote destination had been established all incoming data collected so far
 /// is forwarded to dst. Task resolves when connection is closed.
+#[instrument(skip_all, fields(incoming = ?incoming.peer_addr(), port = ?incoming.local_addr().map(|a| a.port())))]
 pub async fn forward<'a, R, I>(
     incoming: &mut TcpStream,
     mut resolver: R,
@@ -59,21 +57,26 @@ where
         Response = Option<SocketAddr>,
         Error = Box<dyn std::error::Error + Send + Sync + 'static>,
     >,
-    I: Iterator<Item = Box<dyn Parser<String, Box<dyn std::error::Error + Send + 'static>> + Send + 'static>>
+    I: Iterator<
+        Item = Box<
+            dyn Parser<String, Box<dyn std::error::Error + Send + 'static>> + Send + 'static,
+        >,
+    >,
 {
     debug!("enter");
     let port = incoming.local_addr()?.port();
 
     let mut buf = BytesMut::with_capacity(256);
-    
+
     let mut parsers: Vec<_> = parsers.collect();
-    let mut parsers: Vec<&mut _> = parsers.iter_mut()
-        .map(|boxed| boxed.as_mut())
-        .collect();
+    let mut parsers: Vec<&mut _> = parsers.iter_mut().map(|boxed| boxed.as_mut()).collect();
 
     let with_deadline = {
         let duration = Duration::from_secs(30);
-        tokio::time::timeout(duration, parse_service_name(incoming, &mut buf, parsers.as_mut_slice()))
+        tokio::time::timeout(
+            duration,
+            parse_service_name(incoming, &mut buf, parsers.as_mut_slice()),
+        )
     };
 
     // Read the service name from incoming stream

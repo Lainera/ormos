@@ -1,6 +1,5 @@
 /target
-/Cargo.lock
 vendor/**/*
 Notes.md
-rpx
-pipe
+result/**/*
+/result

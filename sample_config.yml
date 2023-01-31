@@ -1,32 +1,42 @@
----
-# Provide optional socket address for custom dns server, defaults to google DNS servers
-dns: 8.8.8.8:53
-# Provide optional catch-all socket address destination for traffic w/o SNI
-default_destination: '[2607:f8b0:400a:807::200e]:80'
-# Provide optional IP address to bind to, defaults to 127.0.0.1
-bind_address: 127.0.0.1
-# List of services to route for 
-services:
-    # hostname
-  - name: bepis.com
-    # Upon receiving request for 'bepis.com'
-    # round robins to addresses below
-    forward:
-      - "127.0.0.1"
-      - "::1"
-    # Listens on ports 3333 and 9000
-    # Forwards everything from 3333 to 6666 
-    # Forwards everything from 9000 to 9000
-    ports:
-      - 3333:6666
-      - 9000
-  - name: google.com
-    # No forward section -> will use DNS
-    ports:
-      - 8000:443
-      # Multiple services can listen on the same port
-      - 3333:443
-     
-  - name: example.com 
-    # No forward section -> will use DNS
-    # No port section -> default to 443:443
+listen:
+  - address: '127.0.0.1:8314'
+    parsers: ['http/1', 'tls']
+
+rules:
+  # Only allow services ending with following domain names 
+  - type: filter 
+    names:
+      - example.com
+      - google.com
+      - internal.consul
+
+  # Apply rewrite rules `memes.internal.consul` -> `memes.consul` 
+  - type: rewrite
+    matcher: '(?P<svc>[a-z.]+)\.internal\.consul'
+    replacer: '$svc.consul'
+
+  # Explicitly redirect `google.com` to localhost
+  - type: constant 
+    name: google.com
+    ips: 
+    - 127.0.0.1
+        
+  # Explicitly update port for google.com
+  - type: constant 
+    name: google.com
+    ports: 
+    - 8314:9988 
+
+  # Use google's dns 
+  - type: dns 
+  # Perform srv lookups for enabled domains 
+    srv:
+      - example.com
+      - my.domain
+    address: 8.8.8.8:53
+    strategy: Ipv6thenIpv4
+
+  # When all fails sink traffic to 
+  # 127.0.0.1:6666
+  - type: fallback
+    address: '127.0.0.1:6666'

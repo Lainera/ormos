@@ -1,32 +1,13 @@
-[package]
-name = "rpx"
-version = "0.3.1"
+[workspace]
+
+members = [
+	"rpx",
+	"ormos",
+]
+
+[workspace.package]
+authors = [
+	"Lainera <fistlain@hotmail.com>",
+]
+
 edition = "2021"
-
-[[bin]]
-name = "rpx"
-path = "src/bin/rpx.rs"
-required-features = ["rpx"]
-
-[dependencies]
-tokio = { version = "~1.18", features = ["net", "rt", "macros", "rt-multi-thread", "io-util", "sync"] }
-futures = "~0.3"
-clap = { version = "~3.1", features = ["default", "derive", "cargo"] }
-trust-dns-resolver = "~0.21"
-rustls = { version = "~0.20" } 
-tracing = "~0.1"
-tracing-subscriber = { version = "~0.3", optional = true }
-anyhow = "~1.0"
-bytes = "~1.1"
-serde_yaml = "~0.8"
-serde = { version = "~1.0", features = ["derive"] }
-rand = { version = "~0.8", features = ["small_rng"] }
-thiserror = "1.0.37"
-pin-project = "1.0.12"
-tower = { version = "0.4.13" }
-
-[dev-dependencies]
-indoc = "~1.0"
-
-[features]
-rpx = ["tracing-subscriber", "tower/filter", "tower/util", "tower/buffer"]
