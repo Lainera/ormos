@@ -1,8 +1,24 @@
+use serde::Deserialize;
 use tracing::{debug, instrument};
 
 use self::future::Fallback;
-use std::task::{Context, Poll};
+use std::{
+    net::SocketAddr,
+    task::{Context, Poll},
+};
 
+#[derive(Debug, Deserialize, Clone)]
+pub struct Config {
+    address: SocketAddr,
+}
+
+impl Config {
+    pub fn address(&self) -> SocketAddr {
+        self.address
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct Layer<D>(D);
 
 impl<D> Layer<D> {

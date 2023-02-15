@@ -8,6 +8,7 @@ use std::{
 /// Leaf resolver that doesn't resolve anything
 ///
 /// Useful in combination with other resolvers
+#[derive(Clone, Debug)]
 pub struct Service;
 
 impl tower::Service<(String, u16)> for Service {
