@@ -67,9 +67,9 @@
           src = lib.cleanSourceWith {
             src = ./.;
             filter = path: type:
-              (regexFilter ".*\.md$" path) 
-              || (regexFilter ".*\.ya?ml$" path) 
-							|| (craneLib.filterCargoSources path type);
+              (regexFilter ".*\.md$" path)
+              || (regexFilter ".*\.ya?ml$" path)
+              || (craneLib.filterCargoSources path type);
           };
 
           # Builder machine dependencies
@@ -110,7 +110,7 @@
         aarch64-crate = applyCross base aarch64-cross;
         x86_64-crate = applyCross base x86_64-cross;
 
-        makeImage = crate: pkgs.dockerTools.buildLayeredImage {
+        makeImage = cross: crate: cross.pkgs.dockerTools.buildLayeredImage {
           name = pname;
           tag = "${version}-${crate.stdenv.targetPlatform.uname.processor}";
           # Magic value for the actual ts;
@@ -133,8 +133,8 @@
             then aarch64-image
             else x86_64-image;
 
-          aarch64-image = makeImage aarch64-crate;
-          x86_64-image = makeImage x86_64-crate;
+          aarch64-image = makeImage aarch64-cross aarch64-crate;
+          x86_64-image = makeImage x86_64-cross x86_64-crate;
         };
 
       });
