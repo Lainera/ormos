@@ -93,11 +93,22 @@ impl Resolver {
             .instrument(dns_span)
             .await?;
 
-        let ips = response.ip_iter();
-        let ports = response.iter().map(|response| response.port());
+        if let Some((name, port)) = response
+            .iter()
+            .map(|response| (response.target(), response.port()))
+            .choose(&mut rng)
+        {
+            let address = self
+                .inner
+                .lookup_ip((*name).clone())
+                .await?
+                .iter()
+                .next()
+                .map(|ip| SocketAddr::from((ip, port)));
 
-        let address = ips.zip(ports).choose(&mut rng).map(SocketAddr::from);
-
-        Ok(address)
+            Ok(address)
+        } else {
+            Ok(None)
+        }
     }
 }
