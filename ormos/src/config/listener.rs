@@ -6,8 +6,8 @@ const DEFAULT_BIND: &str = "127.0.0.1:8314";
 
 /// Configuration for a single listener.
 ///
-/// Listeners consist of bind address and collection of 
-/// incoming traffic parsers to apply. 
+/// Listeners consist of bind address and collection of
+/// incoming traffic parsers to apply.
 #[derive(Deserialize, Debug, PartialEq)]
 pub struct Listener {
     pub address: SocketAddr,
