@@ -5,6 +5,8 @@ members = [
 	"ormos",
 ]
 
+resolver = "2"
+
 [workspace.package]
 authors = [
 	"Lainera <fistlain@hotmail.com>",
